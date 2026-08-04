@@ -13,7 +13,7 @@ maxAbsSlot(M) :- maxSlot(S), maxDay(D), M=D*S.
 max_Emp(M) :- M = #max{ E : emp(_,_,E) }.
 % #show maxAbsSlot/1.
 
-{ shift(S1..S2,L1..L2,D,1..B) } M :- type(S1,S2,L1,L2), day(D), max_Emp(B), maxshifts(M), S1<=S, S<=S2+L2.
+{ shift(S1..S2,L1..L2,D,1..B) } M :- type(S1,S2,L1,L2), day(D), emp(D,S,E), max_Emp(B), maxshifts(M), S1<=S, S<=S2+L2.
 :- shift(S, L, D, E1), shift(S, L, D, E2), E1 != E2. % THIS
 
 abs_shift(S,L,E) :- shift(S1,L,D,E), maxSlot(M), S=(D-1)*M+S1.
