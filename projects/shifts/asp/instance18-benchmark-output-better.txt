@@ -1,0 +1,44 @@
+time clingo asp/shifts.lp -n0 asp/instances/instance-18.lp --stats=2
+
+clingo version 5.8.0
+Reading from asp/shifts.lp ...
+asp/shifts.lp:36:84-85: info: global variable in tuple of aggregate element:
+  S
+
+asp/shifts.lp:37:84-85: info: global variable in tuple of aggregate element:
+  S
+
+Solving...
+UNSATISFIABLE
+
+Models       : 0
+Calls        : 1
+Time         : 0.714s (Solving: 0.00s 1st Model: 0.00s Unsat: 0.00s)
+CPU Time     : 0.714s
+
+Choices      : 225     
+Conflicts    : 76       (Analyzed: 75)
+Restarts     : 0       
+Problems     : 1        (Average Length: 0.00 Splits: 0)
+Lemmas       : 75       (Deleted: 0)
+  Binary     : 7        (Ratio:   9.33%)
+  Ternary    : 6        (Ratio:   8.00%)
+  Conflict   : 75       (Average Length:    5.3 Ratio: 100.00%) 
+  Loop       : 0        (Average Length:    0.0 Ratio:   0.00%) 
+  Other      : 0        (Average Length:    0.0 Ratio:   0.00%) 
+Backjumps    : 75       (Average:  3.00 Max:  28 Sum:    225)
+  Executed   : 75       (Average:  3.00 Max:  28 Sum:    225 Ratio: 100.00%)
+  Bounded    : 0        (Average:  0.00 Max:   0 Sum:      0 Ratio:   0.00%)
+
+Rules        : 489611   (Original: 277279)
+  Choice     : 7001    
+Atoms        : 315930   (Original: 305052 Auxiliary: 10878)
+Bodies       : 247582   (Original: 79228)
+  Sum        : 1050    
+  Count      : 0        (Original: 14176)
+Equivalences : 38098    (Atom=Atom: 12250 Body=Body: 6151 Other: 19697)
+Tight        : Yes
+Variables    : 40733    (Eliminated:    0 Frozen: 4025)
+Constraints  : 74418    (Binary:  84.4% Ternary:  12.8% Other:   2.8%)
+
+clingo asp/shifts.lp -n0 asp/instances/instance-18.lp --stats=2  0,71s user 0,03s system 99% cpu 0,744 total
