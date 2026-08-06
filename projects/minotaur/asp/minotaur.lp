@@ -16,45 +16,67 @@ at(X,Y,0) :- start(X,Y).
 :- not at(X,Y,_), goal(X,Y).
 
 minoat(X,Y,0) :- mino(X,Y).
-minogohoz1(MX+DX,MY,S) :- not wall(MX,MY,MX+DX,MY), onediff(DX), |TX-(MX+DX)| < |TX-MX|, at(TX,TY,S), minoat(MX,MY,S-1).
-minogovec1(MX,MY+DY,S) :- not wall(MX,MY,MX,MY+DY), onediff(DY), |TY-(MY+DY)| < |TY-MY|, at(TX,TY,S), minoat(MX,MY,S-1), not minogohoz1(_,_,S).
-minostay1(MX,MY,S) :- at(TX,TY,S), minoat(MX,MY,S-1), not minogohoz1(_,_,S), not minogovec1(_,_,S).
-% :- not minogovec1(_,_,_).
-% :- not minostay1(_,_,_).
 
-minoat(X,Y,S) :- minostay1(X,Y,S).
-minogohoz2(MX+DX,MY,S) :-
-    not wall(MX,MY,MX+DX,MY), onediff(DX),
-    |TX-(MX+DX)| < |TX-MX|, at(TX,TY,S),
-    minogohoz1(MX,MY,S).
+mino_step(MX,MY,TX,TY,MX+1,MY) :- field(MX,MY), field(TX,TY), MX<TX, not wall(MX,MY,MX+1,MY).
+mino_step(MX,MY,TX,TY,MX-1,MY) :- field(MX,MY), field(TX,TY), MX>TX, not wall(MX,MY,MX-1,MY).
 
-minogohoz2(MX+DX,MY,S) :-
-    not wall(MX,MY,MX+DX,MY), onediff(DX),
-    |TX-(MX+DX)| < |TX-MX|, at(TX,TY,S),
-    minogovec1(MX,MY,S).
+mino_can_hoz(MX,MY,TX) :- mino_step(MX,MY,TX,_,MX+DX,MY), onediff(DX).
 
-minoat(X,Y,S) :- minogohoz2(X,Y,S).
+mino_step(MX,MY,TX,TY,MX,MY+1) :- field(MX,MY), field(TX,TY), MY<TY, not wall(MX,MY,MX,MY+1), not mino_can_hoz(MX,MY,TX).
+mino_step(MX,MY,TX,TY,MX,MY-1) :- field(MX,MY), field(TX,TY), MY>TY, not wall(MX,MY,MX,MY-1), not mino_can_hoz(MX,MY,TX).
 
-minogovec2(MX,MY+DY,S) :-
-    not wall(MX,MY,MX,MY+DY), onediff(DY),
-    |TY-(MY+DY)| < |TY-MY|, at(TX,TY,S),
-    minogohoz1(MX,MY,S), not minogohoz2(_,_,S).
+% mino_can_move(MX,MY,TX,TY) :- mino_step(MX,MY,TX,TY,_,_).
 
-minogovec2(MX,MY+DY,S) :-
-    not wall(MX,MY,MX,MY+DY), onediff(DY),
-    |TY-(MY+DY)| < |TY-MY|, at(TX,TY,S),
-    minogovec1(MX,MY,S), not minogohoz2(_,_,S).
+% mino_step(MX,MY,TX,TY,MX,MY) :- field(MX,MY), field(TX,TY), not mino_can_vec(MX,MY,TY), not mino_can_hoz(MX,MY,TX).
 
-minoat(X,Y,S) :- minogovec2(X,Y,S).
+mino_mid_step(NMX,NMY,S) :- at(TX,TY,S), minoat(MX,MY,S-1), mino_step(MX,MY,TX,TY,NMX,NMY).
+mino_mid_step(MX,MY,S) :- at(TX,TY,S), minoat(MX,MY,S-1), not mino_step(MX,MY,TX,TY,_,_).
+minoat(NMX,NMY,S) :- at(TX,TY,S), mino_mid_step(MX,MY,S), mino_step(MX,MY,TX,TY,NMX,NMY).
+minoat(MX,MY,S) :- at(TX,TY,S), mino_mid_step(MX,MY,S), not mino_step(MX,MY,TX,TY,_,_).
 
-minoat(MX,MY,S) :- minogohoz1(MX,MY,S), not minogohoz2(_,_,S), not minogovec2(_,_,S).
-minoat(MX,MY,S) :- minogovec1(MX,MY,S), not minogohoz2(_,_,S), not minogovec2(_,_,S).
+
+% ================== slower ================================
+% minogohoz1(MX+DX,MY,S) :- not wall(MX,MY,MX+DX,MY), onediff(DX), |TX-(MX+DX)| < |TX-MX|, at(TX,TY,S), minoat(MX,MY,S-1).
+% minogovec1(MX,MY+DY,S) :- not wall(MX,MY,MX,MY+DY), onediff(DY), |TY-(MY+DY)| < |TY-MY|, at(TX,TY,S), minoat(MX,MY,S-1), not minogohoz1(_,_,S).
+% minostay1(MX,MY,S) :- at(TX,TY,S), minoat(MX,MY,S-1), not minogohoz1(_,_,S), not minogovec1(_,_,S).
+% % :- not minogovec1(_,_,_).
+% % :- not minostay1(_,_,_).
+
+% minoat(X,Y,S) :- minostay1(X,Y,S).
+% minogohoz2(MX+DX,MY,S) :-
+%     not wall(MX,MY,MX+DX,MY), onediff(DX),
+%     |TX-(MX+DX)| < |TX-MX|, at(TX,TY,S),
+%     minogohoz1(MX,MY,S).
+
+% minogohoz2(MX+DX,MY,S) :-
+%     not wall(MX,MY,MX+DX,MY), onediff(DX),
+%     |TX-(MX+DX)| < |TX-MX|, at(TX,TY,S),
+%     minogovec1(MX,MY,S).
+
+% minoat(X,Y,S) :- minogohoz2(X,Y,S).
+
+% minogovec2(MX,MY+DY,S) :-
+%     not wall(MX,MY,MX,MY+DY), onediff(DY),
+%     |TY-(MY+DY)| < |TY-MY|, at(TX,TY,S),
+%     minogohoz1(MX,MY,S), not minogohoz2(_,_,S).
+
+% minogovec2(MX,MY+DY,S) :-
+%     not wall(MX,MY,MX,MY+DY), onediff(DY),
+%     |TY-(MY+DY)| < |TY-MY|, at(TX,TY,S),
+%     minogovec1(MX,MY,S), not minogohoz2(_,_,S).
+
+% minoat(X,Y,S) :- minogovec2(X,Y,S).
+
+% minoat(MX,MY,S) :- minogohoz1(MX,MY,S), not minogohoz2(_,_,S), not minogovec2(_,_,S).
+% minoat(MX,MY,S) :- minogovec1(MX,MY,S), not minogohoz2(_,_,S), not minogovec2(_,_,S).
+% ========================================================
 
 %
 % Check solution candidates
 %
 
 :- minoat(X,Y,S), at(X,Y,S).
+% :- at(X,Y,S), mino_mid_step(X,Y,S).
 
 %
 % Optimize solutions
