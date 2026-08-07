@@ -13,5 +13,19 @@ dir(0,1). dir(0,-1). dir(1,0). dir(-1,0).
 
 % Your encoding please...
 
+1 { target(X,Y,X,YY) : area(X,YY,_); target(X,Y,XX,Y) : area(XX,Y,_) } 1 :- number(X,Y,N). 
+
+covers(C,X..XX,Y..YY) :- target(X,Y,XX,YY), C=(X,Y).
+covers(C,XX..X,Y..YY) :- target(X,Y,XX,YY), C=(X,Y).
+covers(C,X..XX,YY..Y) :- target(X,Y,XX,YY), C=(X,Y).
+covers(C,XX..X,YY..Y) :- target(X,Y,XX,YY), C=(X,Y).
+
+
+:- goal(A,G), #sum{ N,X,Y : target(X,Y,AX,AY), number(X,Y,N), area(AX,AY,A) } != G.
+:- covers(C1,X,Y), covers(C2,X,Y), C1!=C2.
+
+area_occupied(A) :- target(_,_,XX,YY), area(XX,YY,A).
+area_id(A) :- area(_,_,A).
+:- area_id(A), not area_occupied(A).
 
 #show target/4.
