@@ -20,15 +20,27 @@ seen(1).
 seen(N) :- seen(I), for(I,neg,N).
 seen(N) :- seen(I), for(I,T,N), logic(T).
 seen(N+1) :- seen(I), for(I,T,N), logic(T).
+:- id(I), not seen(I).
 
 :- for(1, T, J), type(T), J != 2.
 
-:- id(I), not seen(I).
+%------v1---------
+last_child(I, J)   :- for(I, neg, J).
+last_child(I, J+1) :- for(I, T, J), logic(T).
+% :- first_child(J, I2), last_child(I, EndI), I < J, I2 <= EndI.
+:- for(I, T1, _), non_atom(T1), for(J, T2, I2), non_atom(T2), I < J, last_child(I, L1), I2 <= L1.
+%-----v2-----
+% complex(I, I1) :- for(I, T, I1), type(T).
+% logic_node(I) :- for(I, T, _), logic(T).
 
+% :- complex(I, I1), complex(J, I2), I < J, I1 >= I2.
+% :- complex(I, I1), complex(J, I2), I < J, logic_node(I), I1+1 >= I2.
+%------v3-----
 :- for(I,T1,I1), for(J,T2,I2), I<J, logic(T1), type(T2), I1+1>=I2.
 :- for(I,T1,I1), for(J,T2,I2), I<J, type(T1), type(T2), I1>=I2.
+%---------------
 
-:- for(I,T,J), logic(T), for(J,atom,A1), for(J+1,atom,A2), A2<A1.
+:- for(I,T,J), logic(T), for(J,atom,A1), for(J+1,atom,A2), A2<=A1.
 
 :- for(I,T,J), logic(T), for(J,T1,J1), for(J+1,atom,J2), type(T1).
 :- for(I,T,J), logic(T), for(J,T1,J1), for(J+1,neg,J2), logic(T1).
