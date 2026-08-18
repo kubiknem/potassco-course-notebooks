@@ -11,6 +11,8 @@
 %   assign(R,J,I): assign to R the job J at index I (in the sequence of jobs assigned to R)
 %
 
+% this file computes EXCESSIVE models
+
 time(0..n).
 
 % ---------------------------------------------------------------
@@ -73,7 +75,7 @@ hasindex(R,I) :- assign(R,_,I).
 % "does(R,J,O,T)" : robot R performs operation O of job J at time T.
 % Its domain is restricted to time steps where R is actually located
 % at the node required by that operation.
-1 { does(R,J,O,T) : time(T), at(R,N,T) } 1 :- assign(R,J,_), operation(J,O,N).
+1 { does(R,J,O,T) : time(T), at(R,N,T), not at(R,N,T-1) } 1 :- assign(R,J,_), operation(J,O,N).
 
 % operations of the same job must be performed in increasing order of time
 :- does(R,J,O,T), does(R,J,O-1,T2), O > 1, T <= T2.
@@ -99,3 +101,4 @@ moved(R,T) :- at(R,N,T), at(R,N2,T+1), N != N2, time(T), time(T+1).
 %
 #show at/3.
 #show assign/3.
+% #show does/4.
