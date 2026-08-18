@@ -58,8 +58,11 @@ moved(R,X,T+1) :- at(R,X,T), at(R,Y,T+1), X != Y.
 % jcounter(R,0,0) :- robot(R,C,N).
 % jcounter(R,I,T+1) :- assign(R,J,I), jcounter(R,I-1,T), I<=C, I>=0, job_count(C).
 
-{ solving(R,J,T) : assign(R,J,_) } 1 :- time(T).
+solving(R,J,0) :- assign(R,J,1).
 solving(R,J,T+1) :- solving(R,J,T), not completed_job(J,T), time(T+1).
+solving(R,JN,T+1) :- solving(R,J,T), completed_job(J,T), assign(R,J,I), assign(R,JN,I+1), time(T+1).
+
+% solving(r1,j1,1).
 
 lastop(J,O) :- job(J,_,_), O = #max { O1 : operation(J,O1,_) }.
 
@@ -81,11 +84,16 @@ completed_op(J,O,T) :- at(R,X,T), operation(J,O,X), solving(R,J,T), completed_op
 
 completed_job(J,T) :- completed_op(J,O,T), lastop(J,O).
 
+% #show completed_job/2.
+% #show completed_op/3.
+% #show solving/3.
+
 % :- not completed_op(J,O,T), operation(J,O,_).
 :- not completed_job(J,_), job(J,_,_). %, time(T).
 :- completed_job(J,T), job(J,_,D), D<T.
 
-
+% query :- at(r1,1,0), at(r2,5,0), assign(r1,j1,1), assign(r2,j3,1), assign(r1,j2,2), assign(r2,j4,2), at(r2,7,2), at(r1,3,2), at(r1,4,3), at(r2,8,3), at(r2,8,4), at(r1,4,4), at(r1,3,5), at(r2,7,5), at(r1,1,7), at(r2,5,7), at(r1,3,9), at(r2,7,9), at(r2,8,10), at(r1,4,10), at(r1,2,1), at(r1,2,6), at(r1,2,8), at(r2,6,1), at(r2,6,6), at(r2,6,8).
+% :- not query.
 
 #minimize { 1,X,R,T : moved(R,X,T) }.
 
