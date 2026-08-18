@@ -26,69 +26,31 @@ time(0..n).
 #show at/3.
 #show assign/3.
 
-edge(Y,X) :- edge(X,Y).                 % undirected closure
+at(R,N,0) :- robot(R,C,N).
+edge(Y,X) :- edge(X,Y).
 
-node(N) :- edge(N,_).
-node(N) :- robot(_,_,N).
-node(N) :- operation(_,_,N).
 
+rob(R,C) :- robot(R,C,N). % name, class,
+% job_count(C) :- C = #count { 1,J : job(J,_,_) }.
 class(C)        :- job(_,C,_).
 classjobs(C,M)  :- class(C), M = #count { J : job(J,C,_) }.
-lastop(J,O)     :- job(J,_,_), O = #max { O1 : operation(J,O1,_) }.
-
-% nodes reachable by robot R within T steps (used only to restrict the
-% domain of the "at" choice below -- any real trajectory stays inside it)
-reach(R,N,0)     :- robot(R,_,N).
-reach(R,N2,T+1)  :- reach(R,N,T), edge(N,N2), time(T+1).
-reach(R,N,T+1)   :- reach(R,N,T), time(T+1).
-
-% ---------------------------------------------------------------
-% movement of the robots
-% ---------------------------------------------------------------
-
-at(R,N,0) :- robot(R,_,N).
-
-1 { at(R,N,T) : node(N), reach(R,N,T) } 1 :- robot(R,_,_), time(T), T > 0.
-
-% a robot can only move to an adjacent node (or stay)
-:- at(R,N,T), at(R,N2,T+1), N != N2, not edge(N,N2), time(T), time(T+1).
-
-% two robots cannot occupy the same node at the same time
-:- at(R1,N,T), at(R2,N,T), R1 != R2.
-
-% two robots cannot swap positions
-:- at(R1,N1,T), at(R2,N2,T), at(R1,N2,T+1), at(R2,N1,T+1),
-   R1 < R2, N1 != N2, time(T), time(T+1).
-
-% ---------------------------------------------------------------
-% assignment of jobs to robots
-% ---------------------------------------------------------------
-
-% at(R,N,0) :- robot(R,C,N).
-% edge(Y,X) :- edge(X,Y).
 
 
-% % rob(R,C) :- robot(R,C,N). % name, class,
-% % job_count(C) :- C = #count { 1,J : job(J,_,_) }.
-% class(C)        :- job(_,C,_).
-% classjobs(C,M)  :- class(C), M = #count { J : job(J,C,_) }.
+1 { at(R,Y,T+1) : edge(X,Y); at(R,X,T+1) } 1 :- at(R,X,T), time(T+1).
+:- at(R1,X,T-1), at(R2,Y,T-1), at(R1,Y,T), at(R2,X,T),
+   R1 != R2, X != Y, time(T).
 
+moved(R,X,T+1) :- at(R,X,T), at(R,Y,T+1), X != Y.
+% at(R,X,T) :- moved(R,X,T).
+% { at(R,X,T) } 1 :- at(R,X,T-1), time(T).
 
-% 1 { at(R,Y,T+1) : edge(X,Y); at(R,X,T+1) } 1 :- at(R,X,T), time(T+1).
-% :- at(R1,X,T-1), at(R2,Y,T-1), at(R1,Y,T), at(R2,X,T),
-%    R1 != R2, X != Y, time(T).
-
-% moved(R,X,T+1) :- at(R,X,T), at(R,Y,T+1), X != Y.
-% % at(R,X,T) :- moved(R,X,T).
-% % { at(R,X,T) } 1 :- at(R,X,T-1), time(T).
-
-% % :- at(R,X,T), at(R,Y,T), X != Y.
-% :- at(R1,X,T), at(R2,X,T), R1 != R2.
-% % :- time(T), not at(R,_,T), rob(R,_).
+% :- at(R,X,T), at(R,Y,T), X != Y.
+:- at(R1,X,T), at(R2,X,T), R1 != R2.
+% :- time(T), not at(R,_,T), rob(R,_).
 
 % ============== assigning ==================
 
-1 { assign(R,J,I) : robot(R,C,_), I = 1..COUNT } 1 :- job(J,C,D), classjobs(C,COUNT).
+1 { assign(R,J,I) : rob(R,C), I = 1..COUNT } 1 :- job(J,C,D), classjobs(C,COUNT).
 :- assign(R,J1,I), assign(R,J2,I), J1 != J2.
 % :- assign(_,J1,_), assign(_,J2,_), J1 != J2.
 % min_ass(I,R) :- I = #minimize{ A,R : assign(R,J,A), rob(R,:- I != 1, #min{ I,}
@@ -137,8 +99,6 @@ completed_op(J,O,T) :- at(R,X,T), operation(J,O,X), solving(R,J,T), completed_op
 % query :- at(r1,1,0), at(r2,5,0), assign(r1,j1,1), assign(r2,j3,1), assign(r1,j2,2), assign(r2,j4,2), at(r2,7,2), at(r1,3,2), at(r1,4,3), at(r2,8,3), at(r2,8,4), at(r1,4,4), at(r1,3,5), at(r2,7,5), at(r1,1,7), at(r2,5,7), at(r1,3,9), at(r2,7,9), at(r2,8,10), at(r1,4,10), at(r1,2,1), at(r1,2,6), at(r1,2,8), at(r2,6,1), at(r2,6,6), at(r2,6,8).
 % :- not query.
 
-moved(R,T) :- at(R,N,T), at(R,N2,T+1), N != N2, time(T), time(T+1).
-
-#minimize { 1,R,T : moved(R,T) }.
+#minimize { 1,X,R,T : moved(R,X,T) }.
 
 % { assign(R,J,)}
