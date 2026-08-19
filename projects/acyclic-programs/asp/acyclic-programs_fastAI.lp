@@ -29,6 +29,17 @@ sign(1). sign(-1).
 used(A) :- body(_,_,A).
 :- head(_,H), H>1, not used(H).
 
+% For any given example, each rule must be the ONLY rule with that head.
+% "not fails(E,R)" = rule R is triggered for example E. If, every time
+% R is triggered, another rule with the same head is also triggered, deleting R does not change
+% has(E,H) for any E or H—that is, neither fails nor the classification—but the program has
+% one fewer rule, so the original model was not optimal.
+%
+% nfire(E,H,N): For instance E, exactly N rules with head H are triggered.
+nfire(E,H,N) :- example(E,_), head(_,H), N = #count{ R : head(R,H), not fails(E,R) }.
+needed(R) :- head(R,H), example(E,_), not fails(E,R), nfire(E,H,1).
+:- head(R,_), not needed(R).
+
 % ------------ example validation ------------------
 
 fails(E,R) :- body(R,S,A), S = 1, not has(E,A), example(E,_).

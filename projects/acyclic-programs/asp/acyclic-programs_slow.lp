@@ -20,15 +20,6 @@ sign(1). sign(-1).
 % has(E,Head) :- head(R,Head), body(R,S,A), S=1, has(E,A).
 % has(E,Head) :- head(R,Head), body(R,S,A), S=-1, example(E,_), not has(E,A).
 
-% ----------- pruning ----------------------
-
-% A body containing both A and -A will never fire
-:- body(R,1,A), body(R,-1,A).
-
-% can delete rules that will not be used
-used(A) :- body(_,_,A).
-:- head(_,H), H>1, not used(H).
-
 % ------------ example validation ------------------
 
 fails(E,R) :- body(R,S,A), S = 1, not has(E,A), example(E,_).
