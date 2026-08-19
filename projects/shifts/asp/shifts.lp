@@ -28,7 +28,6 @@ covers(S,L,D,AS-N,E) :- shift(S,L,D,E), maxSlot(M), maxAbsSlot(N), AStart=(D-1)*
 :- emp(D, S, Req), exceed(EX), shorten(SH), maxSlot(M), AS=(D-1)*M+S, #sum{ E,S1,L,S,D1 : covers(S1,L,D1,AS,E) } > Req + EX.
 :- emp(D, S, Req), exceed(EX), shorten(SH), maxSlot(M), AS=(D-1)*M+S, #sum{ E,S1,L,S,D1 : covers(S1,L,D1,AS,E) } < Req - SH.
 
-
 %
 % Check solution candidates
 %
@@ -79,7 +78,3 @@ covers(S,L,D,AS-N,E) :- shift(S,L,D,E), maxSlot(M), maxAbsSlot(N), AStart=(D-1)*
 
 #show shift/4.
 % #show abs_shift/3.
-
-
-% query :- shift(8,16,1,3), shift(8,16,2,1), shift(8,16,3,1), shift(8,16,4,1).
-% :- not query.
