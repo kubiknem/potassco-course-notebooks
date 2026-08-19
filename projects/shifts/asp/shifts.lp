@@ -13,43 +13,27 @@ maxAbsSlot(M) :- maxSlot(S), maxDay(D), M=D*S.
 max_Emp(M) :- M = #max{ E : emp(_,_,E) }.
 % #show maxAbsSlot/1.
 
-% { shift(S1..S2,L1..L2,D,1..B) } M :- type(S1,S2,L1,L2), day(D), max_Emp(B), maxshifts(M). % emp(D,S,E) ,S1<=S, S<=S2+L2.
-% :- shift(S, L, D, E1), shift(S, L, D, E2), E1 != E2. % THIS
-% 
-% { shift_prep1(S1..S2,L1..L2) } M :- type(S1,S2,L1,L2), maxshifts(M).
-% shift_prep2(S,L,D) :- shift_prep1(S,L), day(D).
-% 1 { shift(S,L,D,1..B) } 1 :- shift_prep2(S,L,D), max_Emp(B).
-
-% { shift_prep1(S1..S2,L1..L2) } M :- type(S1,S2,L1,L2), maxshifts(M).
-% % shift_prep2(S,L,D) :- shift_prep1(S,L), day(D).
-% 1 { shift(S,L,D,1..B) } 1 :- shift_prep1(S,L), day(D), max_Emp(B).
-
+% ========== shift generation ==============
 shift_prep1(S,L) :- type(S1,S2,L1,L2), S=S1..S2, L=L1..L2.
 { shift_prep2(S,L) : shift_prep1(S,L) } M :- maxshifts(M).
 1 { shift(S,L,D,1..B) } 1 :- shift_prep2(S,L), day(D), max_Emp(B).
 
+% =========== which timepoint does the shift cover =============
 covers(S,L,D,AS,E) :- shift(S,L,D,E), maxSlot(M), maxAbsSlot(N), AStart=(D-1)*M+S, AS=AStart..AStart+L-1, AS<=N.
 covers(S,L,D,AS-N,E) :- shift(S,L,D,E), maxSlot(M), maxAbsSlot(N), AStart=(D-1)*M+S, AS=AStart..AStart+L-1, AS>N.
 
 % #show covers/4.
 
+% ========== emp assignment ==========
 :- emp(D, S, Req), exceed(EX), shorten(SH), maxSlot(M), AS=(D-1)*M+S, #sum{ E,S1,L,S,D1 : covers(S1,L,D1,AS,E) } > Req + EX.
 :- emp(D, S, Req), exceed(EX), shorten(SH), maxSlot(M), AS=(D-1)*M+S, #sum{ E,S1,L,S,D1 : covers(S1,L,D1,AS,E) } < Req - SH.
 
-% abs_shift(S,L,E) :- shift(S1,L,D,E), maxSlot(M), S=(D-1)*M+S1.
-
-% malo(2).
-% moc(6).
-% { pokus(S..L) } 4 :- malo(S), moc(L).
-
-% c :- 0 { a;b }.
-% % a.
-% #show c/0.
 
 %
 % Check solution candidates
 %
 
+% ================ old logic ===================
 % prevDay(D,P) :- day(D), D>1, P=D-1.
 % prevDay(1,M) :- maxDay(M).
 
@@ -87,6 +71,7 @@ covers(S,L,D,AS-N,E) :- shift(S,L,D,E), maxSlot(M), maxAbsSlot(N), AStart=(D-1)*
 % day_missed :- days_shift(S,L,C), maxDay(M), C!=M.
 % :- day_missed. % THIS
 % :- day(D), not shifts_ok(D).
+% ==================================
 
 %
 % Display
