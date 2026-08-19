@@ -177,11 +177,11 @@ needafter(N,A,K) :- node(N), time(A), K > 0,
 #show at/3.
 #show assign/3.
 
-% Proč byla původní verze pomalá (hlavní body)
+% Why the original version was slow (main points)
 
-% 1. Pohyb byl generován jako volba pozice, ne jako volba pohybu. 1 { at(R,N,T) : node(N), reach(R,N,T) } 1 nechá solver zvolit libovolný dosažitelný uzel a teprve integritní omezení :- at(R,N,T), at(R,N2,T+1), not edge(N,N2) to zpětně zakáže — to je O(R·N²·T) pravidel a slabá propagace. Nová verze volí { moved(R,T) } a pozici odvozuje (stání je default). Vedlejší efekt: literály v #minimize jsou přímo rozhodovací atomy, což hodně pomáhá branch & bound.
-% 2. completed_op(J,O-1,T1), T1<T se grounduje kvadraticky v čase; nahrazeno monotónním doneby/3.
-% 3. Chyběly statické vzdálenosti. BFS v grounderu dá zadarmo: dosažitelnostní okno pro at, časová okna opwin(J,O,T) pro každou operaci (earliest/latest z deadlinu) a dolní odhady na čas i na počet pohybů pro celý řetězec přiřazených jobů — ty odříznou nesmys vůbec začne řešit pohyb.
-% 4. Redundantní „slotové" omezení (sekce E): každá operace zabere vlastní   dvojici (uzel, čas). Právální — na uzel 1 je potřeba 12 operací, ale je k dispozici jen 11 časů (v čase 0 tam žádný robot       nestojí), takže UNSAT padezení místo prohledávání.
-%                                                                            Jedna past, na kterou jseapamatování: první verzeBFS měla dist(X,Y,K+1) :- dist(X,Z,K), edge(Z,Y), not seen(X,Y,K) — negace uvnitř rekurzivní komponeyhodnotit staticky, dist se stane solverovým atomem a všechno, co na něm visí, se nafoukne (15M řádků
-% groundu místo 13k, simpleení je rozdělit to namonotónní within/3 a stratifikovanou definici dist/3 nad ním.
+% 1. Movement was generated as a choice of position, not as a choice of movement. 1 { at(R,N,T) : node(N), reach(R,N,T) } 1 lets the solver pick any reachable node, and only the integrity constraint :- at(R,N,T), at(R,N2,T+1), not edge(N,N2) rules it out afterwards — that's O(R·N²·T) rules and weak propagation. The new version chooses { moved(R,T) } and derives the position (staying put is the default). Side effect: the literals in #minimize are now decision atoms directly, which helps branch & bound a lot.
+% 2. completed_op(J,O-1,T1), T1<T grounds quadratically in time; replaced by the monotonic doneby/3.
+% 3. Static distances were missing. BFS in the grounder gives us, for free: a reachability window for at, time windows opwin(J,O,T) for each operation (earliest/latest derived from the deadline), and lower bounds on both time and number of movements for the whole chain of jobs assigned to a robot — these prune nonsense before the solver even starts working on movement.
+% 4. Redundant "slot" constraint (section E): every operation occupies its own (node, time) pair. Example: node 1 needs 12 operations but only 11 time steps are available (at time 0 no robot is standing there yet), so this yields UNSAT detection instead of search.
+%    One trap worth remembering: the first version of the BFS had dist(X,Y,K+1) :- dist(X,Z,K), edge(Z,Y), not seen(X,Y,K) — negation inside a recursive component can't be evaluated statically, so dist becomes a solver atom and everything depending on it blows up (15M lines
+% of ground instead of 13k). The fix is to split it into the monotonic within/3 and a stratified definition of dist/3 on top of it.

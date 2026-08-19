@@ -20,16 +20,13 @@ _cell((X,Y)) :- cell(X,Y).
 maxTime(M) :- M = #count{ X,Y : cell(X,Y) }.
 time(1..M) :- maxTime(M).
 
-% edges are generated directly between grid neighbors -- illegal (non-adjacent)
-% edges are never created, instead of being generated and then filtered out
 { path(C,C') : diff(DX,DY), C=(X,Y), C'=(X+DX,Y+DY), _cell(C') } = 1 :- _cell(C), not _final(C).
 
 % every cell except first has exactly one incoming edge; first has none
 :- _cell(C), not _first(C), #count{ P : path(P,C) } != 1.
 :- path(_,C), _first(C).
 
-% every cell must be reachable from first, this rules out extra disjoint
-% cycles that would otherwise satisfy the degree constraints above
+% every cell must be reachable from first
 reached(C) :- _first(C).
 reached(C') :- reached(C), path(C,C').
 :- _cell(C), not reached(C).
@@ -44,6 +41,7 @@ bend(T) :- path(C,C'), path(C',C''), pos(C',T), not reach_hint(T,_),
     C = (X,Y), C''=(X'',Y''),
     diag(DX,DY), DX=X''-X, DY=Y''-Y.
 
+% ========= hint logic ================
 reach_hint(T,B) :- pos(C',T),
     C' = (X,Y), hint(X,Y,B).
 
@@ -56,7 +54,6 @@ hint_succ(T) :- reach_hint(T,B), B = #count{ T1 : bend(T1), T1>T, T1<=T', next_h
 :- not hint_succ(T), reach_hint(T,_), next_hint_reached(T,T').
 
 % convert path/2 to path/4.
-
 path(X,Y,X1,Y1) :- path(C,C'), C=(X,Y), C'=(X1,Y1).
 
 #show path/4.
