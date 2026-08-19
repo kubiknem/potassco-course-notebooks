@@ -51,7 +51,7 @@ moved(R,X,T+1) :- at(R,X,T), at(R,Y,T+1), X != Y.
 :- assign(R,J1,I), assign(R,J2,I), J1 != J2.
 :- assign(R,_,I), not assign(R,_,I-1), I>1. %, rob_assigned(R).
 
-% ============ job completing =================
+% ============ job completion =================
 solving(R,J,0) :- assign(R,J,1).
 solving(R,J,T+1) :- solving(R,J,T), not completed_job(J,T), time(T+1).
 solving(R,JN,T+1) :- solving(R,J,T), completed_job(J,T), assign(R,J,I), assign(R,JN,I+1), time(T+1).
