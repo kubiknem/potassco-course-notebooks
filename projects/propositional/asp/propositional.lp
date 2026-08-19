@@ -11,6 +11,7 @@ type(neg;or;and).
 logic(or;and).
 id(1..size).
 
+% ------------- formula generation -----------------
 1 { for(I,neg,J) : id(J), J>I;
     for(I,T,J) : logic(T), J=1..size-1, J>I;
     for(I,atom,A) : attribute(A) } 1 :- id(I).
@@ -24,21 +25,9 @@ seen(N+1) :- seen(I), for(I,T,N), logic(T).
 
 :- for(1, T, J), type(T), J != 2.
 
-%------v1---------
-last_child(I, J)   :- for(I, neg, J).
-last_child(I, J+1) :- for(I, T, J), logic(T).
-% :- first_child(J, I2), last_child(I, EndI), I < J, I2 <= EndI.
-:- for(I, T1, _), non_atom(T1), for(J, T2, I2), non_atom(T2), I < J, last_child(I, L1), I2 <= L1.
-%-----v2-----
-% complex(I, I1) :- for(I, T, I1), type(T).
-% logic_node(I) :- for(I, T, _), logic(T).
-
-% :- complex(I, I1), complex(J, I2), I < J, I1 >= I2.
-% :- complex(I, I1), complex(J, I2), I < J, logic_node(I), I1+1 >= I2.
-%------v3-----
+%------ restrictions -----
 :- for(I,T1,I1), for(J,T2,I2), I<J, logic(T1), type(T2), I1+1>=I2.
 :- for(I,T1,I1), for(J,T2,I2), I<J, type(T1), type(T2), I1>=I2.
-%---------------
 
 :- for(I,T,J), logic(T), for(J,atom,A1), for(J+1,atom,A2), A2<=A1.
 
@@ -46,10 +35,13 @@ last_child(I, J+1) :- for(I, T, J), logic(T).
 :- for(I,T,J), logic(T), for(J,T1,J1), for(J+1,neg,J2), logic(T1).
 :- for(I,T,J), logic(T), for(J,and,J1), for(J+1,or,J2).
 
+% ----------------------
+
 %
 % Check solution candidates
 %
 
+% is example satisfiable?
 sat(E) :- example(E,_), sat(E,1).
 
 % atom
